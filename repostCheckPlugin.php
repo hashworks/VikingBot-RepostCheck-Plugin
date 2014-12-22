@@ -60,7 +60,7 @@ class repostCheckPlugin implements pluginInterface {
 							if ($this->db[$channel][$url]["from"] != $from && strpos($msg, $this->db[$channel][$url]["from"]) === false) {
 								$this->sendMessage($channel, "I smell repost! This was posted by " .
 										$this->db[$channel][$url]["from"] . " " .
-										$this->humanReadableTime(time() - $this->db[$channel][$url]["timestamp"]) .
+										$this->secondsToHumanReadableTime(time() - $this->db[$channel][$url]["timestamp"]) .
 										" ago!"
 								);
 								return;
@@ -164,15 +164,32 @@ class repostCheckPlugin implements pluginInterface {
 		 *
 		 * @return string
 		 */
-		function humanReadableTime($seconds) {
+		function secondsToHumanReadableTime($seconds) {
 			if ($seconds >= 86400) {
-				return round($seconds / 86400) . " days";
+				$days = round($seconds / 86400);
+				if ($days > 1) {
+					return $days . " days";
+				} else {
+					return $days . " day";
+				}
 			} elseif ($seconds >= 3600) {
-				return round($seconds / 3600) . " hours";
+				$hours = round($seconds / 3600);
+				if ($hours > 1) {
+					return $hours . " hours";
+				} else {
+					return $hours . " hour";
+				}
 			} elseif ($seconds >= 60) {
-				return round($seconds / 60) . " minutes";
-			} else {
+				$minutes = round($seconds / 60);
+				if ($minutes > 1) {
+					return $minutes . " minutes";
+				} else {
+					return $minutes . " minute";
+				}
+			} elseif ($seconds > 1) {
 				return $seconds . " seconds";
+			} else {
+				return $seconds . " second";
 			}
 		}
 }
