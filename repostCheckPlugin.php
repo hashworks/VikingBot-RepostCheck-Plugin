@@ -28,6 +28,13 @@ class repostCheckPlugin implements pluginInterface {
 		}
 
 		/**
+		 * @return array
+		 */
+		function help() {
+			return array();
+		}
+
+		/**
 		 * Called about twice per second or when there are
 		 * activity on the channel the bot are in.
 		 *
