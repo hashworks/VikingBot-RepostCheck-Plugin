@@ -1,6 +1,8 @@
 <?php
 
-class repostCheckPlugin implements pluginInterface {
+class repostCheckPlugin extends basePlugin {
+
+		private $pluginConfig, $db;
 
 		/**
 		 * Called when plugins are loaded
@@ -8,13 +10,11 @@ class repostCheckPlugin implements pluginInterface {
 		 * @param mixed[]	$config
 		 * @param resource 	$socket
 		**/
-		function init($config, $socket) {
+		public function __construct($config, $socket) {
 			if (!isset($config['plugins']['repostCheck']['hostsToCheck']) || !is_array($config['plugins']['repostCheck']['hostsToCheck'])) {
 				$config['plugins']['repostCheck']['hostsToCheck'] = array();
 			}
-
-			$this->config       = $config;
-			$this->socket       = $socket;
+			parent::__construct($config, $socket);
             $this->pluginConfig = $config['plugins']['repostCheck'];
 
 			$trace = debug_backtrace();
@@ -28,22 +28,6 @@ class repostCheckPlugin implements pluginInterface {
 		}
 
 		/**
-		 * @return array
-		 */
-		function help() {
-			return array();
-		}
-
-		/**
-		 * Called about twice per second or when there are
-		 * activity on the channel the bot are in.
-		 *
-		 * Put your jobs that needs to be run without user interaction here.
-		 */
-		function tick() {
-		}
-
-		/**
 		 * Called when messages are posted on the channel
 		 * the bot are in, or when somebody talks to it
 		 *
@@ -51,7 +35,7 @@ class repostCheckPlugin implements pluginInterface {
 		 * @param string $channel
 		 * @param string $msg
 		 */
-		function onMessage($from, $channel, $msg) {
+		public function onMessage($from, $channel, $msg) {
 			if (preg_match_all("/(http[s]{0,1}:\/\/[\S]+)/i", $msg, $matches)) {
 				foreach ($matches[1] as $url) {
 					$host = parse_url($url, PHP_URL_HOST);
@@ -86,17 +70,8 @@ class repostCheckPlugin implements pluginInterface {
 		/**
 		 * Called when the bot is shutting down
 		 */
-		function destroy() {
+		public function __destruct() {
 			$this->saveDB($this->db);
-		}
-
-		/**
-		 * Called when the server sends data to the bot which is *not* a channel message, useful
-		 * if you want to have a plugin do it`s own communication to the server.
-		 *
-		 * @param string $data
-		 */
-		function onData($data) {
 		}
 
 		/**
@@ -105,7 +80,7 @@ class repostCheckPlugin implements pluginInterface {
 		 *
 		 * @return boolean
 		 */
-		function saveDB($db, $name = "repostCheckPlugin") {
+		private function saveDB($db, $name = "repostCheckPlugin") {
 			$file = $this->dir . DIRECTORY_SEPARATOR . "db" . DIRECTORY_SEPARATOR . $name . ".json";
 			if (is_array($db)) {
 				if (!empty($db)) {
@@ -125,7 +100,7 @@ class repostCheckPlugin implements pluginInterface {
 		 *
 		 * @return array
 		 */
-		function loadDB($name = "repostCheckPlugin") {
+		private function loadDB($name = "repostCheckPlugin") {
 			$file = $this->dir . DIRECTORY_SEPARATOR . "db" . DIRECTORY_SEPARATOR . $name . ".json";
 			if (file_exists($file) && ($db = file_get_contents($file)) !== false) {
 				if ($db = json_decode($db, true)) {
@@ -141,7 +116,7 @@ class repostCheckPlugin implements pluginInterface {
 		 *
 		 * @return string|boolean
 		 */
-		function getCommandQuery($msg, $command) {
+		private function getCommandQuery($msg, $command) {
 			if(stringStartsWith(strtolower($msg), $this->config['trigger'] . $command)) {
 				$query = str_replace($this->config['trigger'] . $command, "", $msg);
 				$query = trim($query);
@@ -156,7 +131,7 @@ class repostCheckPlugin implements pluginInterface {
 		 * @param string $msg
 		 * @param string|array $highlight = NULL
 		 */
-		function sendMessage($to, $msg, $highlight = NULL) {
+		private function sendMessage($to, $msg, $highlight = NULL) {
 			if ($highlight !== NULL) {
 				if (is_array($highlight)) {
 					$highlight = join(", ", $highlight);
@@ -171,7 +146,7 @@ class repostCheckPlugin implements pluginInterface {
 		 *
 		 * @return string
 		 */
-		function secondsToHumanReadableTime($seconds) {
+		private function secondsToHumanReadableTime($seconds) {
 			if ($seconds >= 86400) {
 				$days = round($seconds / 86400);
 				if ($days > 1) {
