@@ -102,7 +102,7 @@ class repostCheckPlugin extends basePlugin {
 	 */
 	private function loadDB($name = "repostCheckPlugin") {
 		$file = $this->dir . DIRECTORY_SEPARATOR . "db" . DIRECTORY_SEPARATOR . $name . ".json";
-		if (file_exists($file) && ($db = file_get_contents($file)) !== false) {
+		if (file_exists($file) && ($db = @file_get_contents($file)) !== false) {
 			if ($db = json_decode($db, true)) {
 				return $db;
 			}
